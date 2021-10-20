@@ -1,0 +1,53 @@
+package CodeCoverage;
+
+{$R *.res}
+{$R *.dres}
+{$IFDEF IMPLICITBUILDING This IFDEF should not be used by users}
+{$ALIGN 8}
+{$ASSERTIONS ON}
+{$BOOLEVAL OFF}
+{$DEBUGINFO OFF}
+{$EXTENDEDSYNTAX ON}
+{$IMPORTEDDATA ON}
+{$IOCHECKS ON}
+{$LOCALSYMBOLS ON}
+{$LONGSTRINGS ON}
+{$OPENSTRINGS ON}
+{$OPTIMIZATION OFF}
+{$OVERFLOWCHECKS OFF}
+{$RANGECHECKS OFF}
+{$REFERENCEINFO ON}
+{$SAFEDIVIDE OFF}
+{$STACKFRAMES ON}
+{$TYPEDADDRESS OFF}
+{$VARSTRINGCHECKS ON}
+{$WRITEABLECONST OFF}
+{$MINENUMSIZE 1}
+{$IMAGEBASE $400000}
+{$DEFINE DEBUG}
+{$ENDIF IMPLICITBUILDING}
+{$DESCRIPTION 'Code Coverage Magician'}
+{$LIBSUFFIX '280'}
+{$DESIGNONLY}
+{$IMPLICITBUILD ON}
+
+requires
+  DesignIDE;
+
+contains
+  CodeCoverage.ApiHelper in '..\..\Source\CodeCoverage.ApiHelper.pas',
+  CodeCoverage.Consts in '..\..\Source\CodeCoverage.Consts.pas',
+  CodeCoverage.Base.DM in '..\..\Source\CodeCoverage.Base.DM.pas' {dmCodeCoverageBase: TDataModule},
+  CodeCoverage.Handler in '..\..\Source\CodeCoverage.Handler.pas',
+  CodeCoverage.KeyBindings in '..\..\Source\CodeCoverage.KeyBindings.pas',
+  CodeCoverage.Main in '..\..\Source\CodeCoverage.Main.pas',
+  CodeCoverage.Notifier in '..\..\Source\CodeCoverage.Notifier.pas',
+  CodeCoverage.Settings in '..\..\Source\CodeCoverage.Settings.pas',
+  CodeCoverage.Settings.BaseFrame in '..\..\Source\CodeCoverage.Settings.BaseFrame.pas' {FrMagicianSettingsBase: TFrame},
+  CodeCoverage.Settings.Handler in '..\..\Source\CodeCoverage.Settings.Handler.pas',
+  CodeCoverage.SyntaxTypes in '..\..\Source\CodeCoverage.SyntaxTypes.pas',
+  CodeCoverage.Tools in '..\..\Source\CodeCoverage.Tools.pas',
+  CodeCoverage.Types in '..\..\Source\CodeCoverage.Types.pas',
+  CodeCoverage.DM in '..\..\Source\HighDPI\CodeCoverage.DM.pas' {dmCodeCoverage: TDataModule};
+
+end.
