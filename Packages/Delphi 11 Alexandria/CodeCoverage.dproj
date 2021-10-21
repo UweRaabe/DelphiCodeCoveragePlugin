@@ -89,13 +89,6 @@
         <DCCReference Include="..\..\Source\CodeCoverage.KeyBindings.pas"/>
         <DCCReference Include="..\..\Source\CodeCoverage.Main.pas"/>
         <DCCReference Include="..\..\Source\CodeCoverage.Notifier.pas"/>
-        <DCCReference Include="..\..\Source\CodeCoverage.Settings.pas"/>
-        <DCCReference Include="..\..\Source\CodeCoverage.Settings.BaseFrame.pas">
-            <Form>FrMagicianSettingsBase</Form>
-            <FormType>dfm</FormType>
-            <DesignClass>TFrame</DesignClass>
-        </DCCReference>
-        <DCCReference Include="..\..\Source\CodeCoverage.Settings.Handler.pas"/>
         <DCCReference Include="..\..\Source\CodeCoverage.SyntaxTypes.pas"/>
         <DCCReference Include="..\..\Source\CodeCoverage.Tools.pas"/>
         <DCCReference Include="..\..\Source\CodeCoverage.Types.pas"/>
