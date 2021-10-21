@@ -1,4 +1,4 @@
-unit CodeCoverage.Base.DM;
+unit CodeCoverage.DM;
 
 interface
 
@@ -8,7 +8,7 @@ uses
   CodeCoverage.Handler;
 
 type
-  TdmCodeCoverageBase = class(TDataModule)
+  TdmCodeCoverage = class(TDataModule)
     Actions: TActionList;
     actSwitchCodeCoverage: TAction;
     actRunCodeCoverage: TAction;
@@ -25,17 +25,19 @@ type
     FMenuItems: TComponentList;
     procedure RememberActions;
     procedure RememberMenuItems;
-    procedure CheckCurrentMethodState;
-    procedure CheckHasCodeCoverage;
     procedure SetCodeCoverage(const Value: TCodeCoverage);
   strict protected
-    function FindImageIndexByName(const AImageName: string): Integer; virtual; abstract;
+    procedure ExecuteRunCodeCoverage;
+    procedure ExecuteSwitchCodeCoverage;
+    procedure UpdateRunCodeCoverage;
+    procedure UpdateSwitchCodeCoverage;
   protected
-    function GetImageList: TCustomImageList; virtual; abstract;
+    function GetImageList: TCustomImageList;
   public
     constructor Create(AOwner: TComponent); override;
     constructor CreateNew(AOwner: TComponent; Dummy: Integer = 0); override;
     destructor Destroy; override;
+    function FindImageIndexByName(const AImageName: string): Integer;
     function IsMyAction(Action: TBasicAction): Boolean;
     procedure RemoveActions;
     procedure RemoveMenuItems;
@@ -45,15 +47,18 @@ type
   end;
 
 var
-  dmCodeCoverageBase: TdmCodeCoverageBase;
+  dmCodeCoverage: TdmCodeCoverage;
 
 implementation
+
+uses
+  CodeCoverage.Images.DM;
 
 {%CLASSGROUP 'Vcl.Controls.TControl'}
 
 {$R *.dfm}
 
-constructor TdmCodeCoverageBase.Create(AOwner: TComponent);
+constructor TdmCodeCoverage.Create(AOwner: TComponent);
 begin
   inherited Create(AOwner);
   FActions := TComponentList.Create(False);
@@ -62,51 +67,46 @@ begin
   RememberMenuItems;
 end;
 
-constructor TdmCodeCoverageBase.CreateNew(AOwner: TComponent; Dummy: Integer);
+constructor TdmCodeCoverage.CreateNew(AOwner: TComponent; Dummy: Integer);
 begin
   { avoids the datamodule being added to Screen.Datamodules }
-  Dummy := -1;
+//  Dummy := -1;
   inherited;
 end;
 
-destructor TdmCodeCoverageBase.Destroy;
+destructor TdmCodeCoverage.Destroy;
 begin
   FMenuItems.Free;
   FActions.Free;
   inherited Destroy;
 end;
 
-procedure TdmCodeCoverageBase.actRunCodeCoverageExecute(Sender: TObject);
+procedure TdmCodeCoverage.actRunCodeCoverageExecute(Sender: TObject);
 begin
-  if CodeCoverage <> nil then begin
-    CodeCoverage.Execute;
-  end;
+  ExecuteRunCodeCoverage;
 end;
 
-procedure TdmCodeCoverageBase.actRunCodeCoverageUpdate(Sender: TObject);
+procedure TdmCodeCoverage.actRunCodeCoverageUpdate(Sender: TObject);
 begin
-  CheckHasCodeCoverage;
+  UpdateRunCodeCoverage;
 end;
 
-procedure TdmCodeCoverageBase.actSwitchCodeCoverageExecute(Sender: TObject);
+procedure TdmCodeCoverage.actSwitchCodeCoverageExecute(Sender: TObject);
 begin
-  if CodeCoverage <> nil then begin
-    CodeCoverage.SwitchCodeCoverage;
-    CheckCurrentMethodState;
-  end;
+  ExecuteSwitchCodeCoverage;
 end;
 
-procedure TdmCodeCoverageBase.actSwitchCodeCoverageUpdate(Sender: TObject);
+procedure TdmCodeCoverage.actSwitchCodeCoverageUpdate(Sender: TObject);
 begin
-  CheckCurrentMethodState;
+  UpdateSwitchCodeCoverage;
 end;
 
-function TdmCodeCoverageBase.IsMyAction(Action: TBasicAction): Boolean;
+function TdmCodeCoverage.IsMyAction(Action: TBasicAction): Boolean;
 begin
   Result := (FActions.IndexOf(Action) >= 0);
 end;
 
-procedure TdmCodeCoverageBase.RememberActions;
+procedure TdmCodeCoverage.RememberActions;
 var
   item: TContainedAction;
 begin
@@ -116,7 +116,7 @@ begin
   end;
 end;
 
-procedure TdmCodeCoverageBase.RememberMenuItems;
+procedure TdmCodeCoverage.RememberMenuItems;
 var
   item: TMenuItem;
 begin
@@ -125,7 +125,7 @@ begin
   end;
 end;
 
-procedure TdmCodeCoverageBase.RemoveActions;
+procedure TdmCodeCoverage.RemoveActions;
 var
   I: Integer;
 begin
@@ -134,7 +134,7 @@ begin
   end;
 end;
 
-procedure TdmCodeCoverageBase.RemoveMenuItems;
+procedure TdmCodeCoverage.RemoveMenuItems;
 var
   I: Integer;
 begin
@@ -143,7 +143,7 @@ begin
   end;
 end;
 
-procedure TdmCodeCoverageBase.CheckCurrentMethodState;
+procedure TdmCodeCoverage.UpdateSwitchCodeCoverage;
 var
   state: TCoverState;
 begin
@@ -157,7 +157,7 @@ begin
   actSwitchCodeCoverage.Checked := (state = TCoverState.covered);
 end;
 
-procedure TdmCodeCoverageBase.CheckHasCodeCoverage;
+procedure TdmCodeCoverage.UpdateRunCodeCoverage;
 var
   enabled: Boolean;
 begin
@@ -168,7 +168,32 @@ begin
   actRunCodeCoverage.Enabled := enabled;
 end;
 
-procedure TdmCodeCoverageBase.SetCodeCoverage(const Value: TCodeCoverage);
+procedure TdmCodeCoverage.ExecuteRunCodeCoverage;
+begin
+  if CodeCoverage <> nil then begin
+    CodeCoverage.Execute;
+  end;
+end;
+
+procedure TdmCodeCoverage.ExecuteSwitchCodeCoverage;
+begin
+  if CodeCoverage <> nil then begin
+    CodeCoverage.SwitchCodeCoverage;
+    UpdateSwitchCodeCoverage;
+  end;
+end;
+
+function TdmCodeCoverage.FindImageIndexByName(const AImageName: string): Integer;
+begin
+  Result := dmCodeCoverageImages.FindImageIndexByName(AImageName);
+end;
+
+function TdmCodeCoverage.GetImageList: TCustomImageList;
+begin
+  Result := Actions.Images;
+end;
+
+procedure TdmCodeCoverage.SetCodeCoverage(const Value: TCodeCoverage);
 begin
   if FCodeCoverage <> Value then
   begin

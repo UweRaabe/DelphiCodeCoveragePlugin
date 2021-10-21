@@ -47,9 +47,9 @@ implementation
 
 uses
   System.IOUtils, System.Types, System.StrUtils, System.Classes,
-  Vcl.Controls,
-  CodeCoverage.Tools, CodeCoverage.Consts, CodeCoverage.DM, CodeCoverage.KeyBindings, CodeCoverage.ApiHelper,
-  ToolsApi;
+  Vcl.Controls, Vcl.Forms,
+  ToolsApi, CodeCoverage.Tools, CodeCoverage.Consts, CodeCoverage.DM, CodeCoverage.KeyBindings, CodeCoverage.ApiHelper,
+  CodeCoverage.Images.DM;
 
 resourcestring
   SCodeCoverage = 'Code Coverage';
@@ -87,19 +87,20 @@ begin
   FCodeCoverage := TCodeCoverage.Create;
   FCodeCoverage.Initialize;
 
+  dmCodeCoverageImages := TdmCodeCoverageImages.Create(nil);
   dmCodeCoverage := TdmCodeCoverage.Create(nil);
   dmCodeCoverage.CodeCoverage := CodeCoverage;
 
   {$IF Declared(TGraphicArray) }
-  SplashScreenServices.AddPluginBitmap(Title, dmCodeCoverage.ImageArray[cIconName], False, '', '');
-  FPluginInfoID := OTA.AboutBoxServices.AddPluginInfo(Title, Description, dmCodeCoverage.ImageArray[cIconName]);
+  SplashScreenServices.AddPluginBitmap(Title, dmCodeCoverageImages.ImageArray[cIconName], False, '', '');
+  FPluginInfoID := OTA.AboutBoxServices.AddPluginInfo(Title, Description, dmCodeCoverageImages.ImageArray[cIconName]);
   {$ELSE}
   SplashScreenServices.AddPluginBitmap(Title, SplashBitmap.Handle);
   FPluginInfoID := OTA.AboutBoxServices.AddPluginInfo(Title, Description, AboutBitmap.Handle, False, '', '', otaafDefined);
   {$IFEND}
   TKeyboardBinding.Create(CodeCoverage);
 
-  dmCodeCoverage.ImageIndexOffset := NTA.Services.AddImages(dmCodeCoverage.Images, cInternalName);
+  dmCodeCoverage.ImageIndexOffset := NTA.Services.AddImages(dmCodeCoverage.ImageList, cInternalName);
   AddMenuItems;
   AddToolbars;
 end;
@@ -110,7 +111,7 @@ begin
 
   RemoveToolButtons;
   RemoveMenuItem;
-//  NTA.Services.AddImages(nil, cInternalName);
+  NTA.Services.AddImages(nil, cInternalName);
 
   if FPluginInfoID > 0 then begin
     OTA.AboutBoxServices.RemovePluginInfo(FPluginInfoID);
@@ -118,6 +119,8 @@ begin
 
   dmCodeCoverage.Free;
   dmCodeCoverage := nil;
+  dmCodeCoverageImages.Free;
+  dmCodeCoverageImages := nil;
 
   FCodeCoverage.Free;
   FAboutBitmap.Free;

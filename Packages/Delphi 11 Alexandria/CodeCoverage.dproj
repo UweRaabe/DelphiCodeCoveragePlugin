@@ -80,9 +80,8 @@
         <DCCReference Include="DesignIDE.dcp"/>
         <DCCReference Include="..\..\Source\CodeCoverage.ApiHelper.pas"/>
         <DCCReference Include="..\..\Source\CodeCoverage.Consts.pas"/>
-        <DCCReference Include="..\..\Source\CodeCoverage.Base.DM.pas">
-            <Form>dmCodeCoverageBase</Form>
-            <FormType>dfm</FormType>
+        <DCCReference Include="..\..\Source\CodeCoverage.DM.pas">
+            <Form>dmCodeCoverage</Form>
             <DesignClass>TDataModule</DesignClass>
         </DCCReference>
         <DCCReference Include="..\..\Source\CodeCoverage.Handler.pas"/>
@@ -92,9 +91,8 @@
         <DCCReference Include="..\..\Source\CodeCoverage.SyntaxTypes.pas"/>
         <DCCReference Include="..\..\Source\CodeCoverage.Tools.pas"/>
         <DCCReference Include="..\..\Source\CodeCoverage.Types.pas"/>
-        <DCCReference Include="..\..\Source\HighDPI\CodeCoverage.DM.pas">
-            <Form>dmCodeCoverage</Form>
-            <FormType>dfm</FormType>
+        <DCCReference Include="..\..\Source\HighDPI\CodeCoverage.Images.DM.pas">
+            <Form>dmCodeCoverageImages</Form>
             <DesignClass>TDataModule</DesignClass>
         </DCCReference>
         <RcItem Include="..\..\Images\CodeCoverage.ico">

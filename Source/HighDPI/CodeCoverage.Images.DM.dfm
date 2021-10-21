@@ -1,4 +1,6 @@
-inherited dmCodeCoverage: TdmCodeCoverage
+object dmCodeCoverageImages: TdmCodeCoverageImages
+  Height = 336
+  Width = 536
   PixelsPerInch = 144
   object Images: TVirtualImageList
     AutoFill = True

@@ -1,4 +1,4 @@
-unit CodeCoverage.DM;
+unit CodeCoverage.Images.DM;
 
 interface
 
@@ -6,29 +6,25 @@ uses
   Winapi.Windows,
   System.ImageList, System.Classes, System.Actions, System.Messaging,
   Vcl.ImgList, Vcl.Controls, Vcl.Menus, Vcl.ActnList, Vcl.Graphics, Vcl.VirtualImageList, Vcl.BaseImageCollection,
-  Vcl.ImageCollection, Vcl.Forms,
-  CodeCoverage.Base.DM;
+  Vcl.ImageCollection, Vcl.Forms;
 
 type
-  TdmCodeCoverage = class(TdmCodeCoverageBase)
+  TdmCodeCoverageImages = class(TDatamodule)
     Images: TVirtualImageList;
     MainImageCollection: TImageCollection;
   private
     FDPIChangedMessageID: Integer;
     procedure DPIChangedMessageHandler(const Sender: TObject; const M: System.Messaging.TMessage);
     function GetImageArray(const AImageName: string): TGraphicArray;
-  strict protected
-    function FindImageIndexByName(const AImageName: string): Integer; override;
-  protected
-     function GetImageList: TCustomImageList; override;
   public
     constructor Create(AOwner: TComponent); override;
     destructor Destroy; override;
+    function FindImageIndexByName(const AImageName: string): Integer;
     property ImageArray[const AImageName: string]: TGraphicArray read GetImageArray;
   end;
 
 var
-  dmCodeCoverage: TdmCodeCoverage;
+  dmCodeCoverageImages: TdmCodeCoverageImages;
 
 implementation
 
@@ -39,19 +35,19 @@ uses
 
 {$R *.dfm}
 
-constructor TdmCodeCoverage.Create(AOwner: TComponent);
+constructor TdmCodeCoverageImages.Create(AOwner: TComponent);
 begin
   inherited;
   FDPIChangedMessageID := TMessageManager.DefaultManager.SubscribeToMessage(TChangeScaleMessage, DPIChangedMessageHandler);
 end;
 
-destructor TdmCodeCoverage.Destroy;
+destructor TdmCodeCoverageImages.Destroy;
 begin
   TMessageManager.DefaultManager.Unsubscribe(TChangeScaleMessage, FDPIChangedMessageID);
   inherited;
 end;
 
-procedure TdmCodeCoverage.DPIChangedMessageHandler(const Sender: TObject; const M: System.Messaging.TMessage);
+procedure TdmCodeCoverageImages.DPIChangedMessageHandler(const Sender: TObject; const M: System.Messaging.TMessage);
 var
   size: Integer;
 begin
@@ -59,12 +55,12 @@ begin
   Images.SetSize(size, size);
 end;
 
-function TdmCodeCoverage.FindImageIndexByName(const AImageName: string): Integer;
+function TdmCodeCoverageImages.FindImageIndexByName(const AImageName: string): Integer;
 begin
   Result := Images.GetIndexByName(AImageName);
 end;
 
-function TdmCodeCoverage.GetImageArray(const AImageName: string): TGraphicArray;
+function TdmCodeCoverageImages.GetImageArray(const AImageName: string): TGraphicArray;
 var
   idx: Integer;
   item: TImageCollectionItem;
@@ -77,11 +73,6 @@ begin
   SetLength(Result, item.SourceImages.Count);
   for I := 0 to item.SourceImages.Count - 1 do
     Result[I] := item.SourceImages[I].Image;
-end;
-
-function TdmCodeCoverage.GetImageList: TCustomImageList;
-begin
-  Result := Images;
 end;
 
 end.

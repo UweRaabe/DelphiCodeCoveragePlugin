@@ -1,8 +1,9 @@
-object dmCodeCoverageBase: TdmCodeCoverageBase
+object dmCodeCoverage: TdmCodeCoverage
   OldCreateOrder = True
   Height = 302
   Width = 584
   object Actions: TActionList
+    Images = dmCodeCoverageImages.Images
     Left = 120
     Top = 40
     object actSwitchCodeCoverage: TAction

@@ -1,4 +1,7 @@
-inherited dmCodeCoverage: TdmCodeCoverage
+object dmCodeCoverageImages: TdmCodeCoverageImages
+  OldCreateOrder = True
+  Height = 336
+  Width = 536
   object Images: TPngImageList
     PngImages = <
       item
@@ -322,5 +325,6 @@ inherited dmCodeCoverage: TdmCodeCoverage
       end>
     Left = 208
     Top = 40
+    Bitmap = {}
   end
 end
