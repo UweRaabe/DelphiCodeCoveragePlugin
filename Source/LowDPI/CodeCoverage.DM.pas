@@ -14,6 +14,8 @@ type
   private
   strict protected
     function FindImageIndexByName(const AImageName: string): Integer; override;
+  protected
+    function GetImageList: TCustomImageList; override;
   public
   end;
 
@@ -29,6 +31,11 @@ implementation
 function TdmCodeCoverage.FindImageIndexByName(const AImageName: string): Integer;
 begin
   Result := Images.FindIndexByName(AImageName);
+end;
+
+function TdmCodeCoverage.GetImageList: TCustomImageList;
+begin
+  Result := Images;
 end;
 
 end.
