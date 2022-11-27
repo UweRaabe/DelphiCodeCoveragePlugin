@@ -22,6 +22,6 @@ Click the Run Code Coverage toolbar button. The test programm will run and at th
 
 ![image](https://user-images.githubusercontent.com/9463873/138178682-f7a4a8e8-5c55-44fc-ac47-c88b330705d9.png)
 
-Right to the method header you can see the code coverage of the method in percent (lines executed vs. total lines). The number in brackets behind each line shows the number of executions of that line. The red error after a line shows a line never executed. Little circles in the first column of each code line give a quick overview which lines are executed (filled blue circle), which are not executed (filled red circle) and which cannot be executed (hollow blue circle). The last also have no blue debugger dots in the gutter.
+Right to the method header you can see the code coverage of the method in percent (lines executed vs. total lines). The number in brackets behind each line shows the number of executions of that line. The red arrow after a line shows a line never executed. Little circles in the first column of each code line give a quick overview which lines are executed (filled blue circle), which are not executed (filled red circle) and which cannot be executed (hollow blue circle). The last also have no blue debugger dots in the gutter.
 
 Uncommenting the different test cases will result in more code covered. The goal is to have as much test cases to get 100% code coverage.
