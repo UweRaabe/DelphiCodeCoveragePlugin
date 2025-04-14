@@ -7,7 +7,8 @@
         <MainSource>CodeCoverage.dpk</MainSource>
         <Platform Condition="'$(Platform)'==''">Win32</Platform>
         <ProjectGuid>{39F1CBBC-9BB2-4B75-B856-8E53C0E014D9}</ProjectGuid>
-        <ProjectVersion>19.3</ProjectVersion>
+        <ProjectName Condition="'$(ProjectName)'==''">CodeCoverage</ProjectName>
+        <ProjectVersion>20.3</ProjectVersion>
         <TargetedPlatforms>1</TargetedPlatforms>
     </PropertyGroup>
     <PropertyGroup Condition="'$(Config)'=='Base' or '$(Base)'!=''">
@@ -43,7 +44,7 @@
         <DCC_Namespace>System;Xml;Data;Datasnap;Web;Soap;Vcl;Vcl.Imaging;Vcl.Touch;Vcl.Samples;Vcl.Shell;CodeCoverage;$(DCC_Namespace)</DCC_Namespace>
         <DCC_UnitSearchPath>..\..\Source\DelphiAST;..\..\Source\PngComponents;$(DCC_UnitSearchPath)</DCC_UnitSearchPath>
         <DesignOnlyPackage>true</DesignOnlyPackage>
-        <DllSuffix>280</DllSuffix>
+        <DllSuffix>290</DllSuffix>
         <GenDll>true</GenDll>
         <GenPackage>true</GenPackage>
         <VerInfo_Locale>1031</VerInfo_Locale>
@@ -126,12 +127,18 @@
             <Platforms>
                 <Platform value="Win32">True</Platform>
                 <Platform value="Win64">False</Platform>
+                <Platform value="Win64x">False</Platform>
             </Platforms>
             <MMX>
                 <UsesClauseFormatter AutoFormat="1">
                     <GroupNames>(ToolsApi);WinApi;System.Win;System;Data;Vcl;Png*</GroupNames>
                 </UsesClauseFormatter>
             </MMX>
+            <DelphiInfo>
+                <IDEVersion NAME="Delphi 12.3 Athens" VERSION="36.3" SKU="52" TRIAL="0">
+                    <PLATFORMS>Win64,Win64x,Win32</PLATFORMS>
+                </IDEVersion>
+            </DelphiInfo>
         </BorlandProject>
         <ProjectFileVersion>12</ProjectFileVersion>
     </ProjectExtensions>
