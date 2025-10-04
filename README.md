@@ -1,9 +1,9 @@
 # DelphiCodeCoveragePlugin
 Delphi Code Coverage Plugin
 
-The DelphiCode Coverage Plugin adds code coverage to teh Delphi IDE. It supports Delphi 10.2 Tokyo, Delphi 10.3 Rio, Delphi 10.4 Sydney, Delphi 11 Alexandria and Delphi 12 Athens.
+The DelphiCode Coverage Plugin adds code coverage to the Delphi IDE. It supports Delphi versions from 10.2 Tokyo up to 13 Florence.
 
-To install the plugin open the appropriate package for your Delpih version, compile and install it into the IDE. Due to a display problem of the main toolbar a restart of the IDE is suggested. After that you should see two code coverage buttons: 
+To install the plugin open the appropriate package for your Delpih version, compile and install it into the IDE. Due to a display problem of the main toolbar in less recent Delphi versions a restart of the IDE is suggested. After that you should see two code coverage buttons: 
 
 ![RunCodeCoverage](https://user-images.githubusercontent.com/9463873/138177527-34b6e174-ccd4-4de2-b3e4-3b4c0f9651fb.png) Run Code Coverage: starts the test project in code coverage mode and displays the results. 
 
