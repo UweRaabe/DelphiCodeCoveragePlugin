@@ -26,6 +26,7 @@ type
   TSyntaxNodeClass = class of TSyntaxNode;
   TSyntaxNode = class
   private
+    FLineSeq: Integer;
     FCol: Integer;
     FLine: Integer;
     FFileName: string;
@@ -81,6 +82,7 @@ type
     property Typ: TSyntaxNodeType read FTyp;
     property ParentNode: TSyntaxNode read FParentNode;
 
+    property LineSeq: Integer read FLineSeq write FLineSeq;
     property Col: Integer read FCol write FCol;
     property Line: Integer read FLine write FLine;
     property FileName: string read FFileName write FFileName;
@@ -147,7 +149,7 @@ type
   end;
 
 const
-  OperatorsInfo: array [0..27] of TOperatorInfo =
+  OperatorsInfo: array [0..29] of TOperatorInfo =
     ((Typ: ntAddr;         Priority: 1; Kind: okUnary;  AssocType: atRight),
      (Typ: ntDeref;        Priority: 1; Kind: okUnary;  AssocType: atLeft),
      (Typ: ntGeneric;      Priority: 1; Kind: okBinary; AssocType: atRight),
@@ -175,7 +177,9 @@ const
      (Typ: ntLowerEqual;   Priority: 9; Kind: okBinary; AssocType: atRight),
      (Typ: ntGreaterEqual; Priority: 9; Kind: okBinary; AssocType: atRight),
      (Typ: ntIn;           Priority: 9; Kind: okBinary; AssocType: atRight),
-     (Typ: ntIs;           Priority: 9; Kind: okBinary; AssocType: atRight));
+     (Typ: ntNotIn;        Priority: 9; Kind: okBinary; AssocType: atRight),
+     (Typ: ntIs;           Priority: 9; Kind: okBinary; AssocType: atRight),
+     (Typ: ntIsNot;        Priority: 9; Kind: okBinary; AssocType: atRight));
 
 { TOperators }
 
@@ -536,6 +540,7 @@ end;
 
 procedure TSyntaxNode.AssignPositionFrom(const Node: TSyntaxNode);
 begin
+  FLineSeq := Node.LineSeq;
   FCol := Node.Col;
   FLine := Node.Line;
   FFileName := Node.FileName;

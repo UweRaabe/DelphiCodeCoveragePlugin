@@ -61,6 +61,7 @@ type
     procedure CallInheritedPropertyParameterList;
     procedure SetCurrentCompoundNodesEndPosition;
     procedure DoOnComment(Sender: TObject; const Text: string);
+    function DequoteString(const S: string): string;
   protected
     FStack: TNodeStack;
     FComments: TObjectList<TCommentNode>;
@@ -113,6 +114,7 @@ type
     procedure DirectiveInline; override;
     procedure DispInterfaceForward; override;
     procedure DotOp; override;
+    procedure ElseExpression; override;
     procedure ElseStatement; override;
     procedure EmptyStatement; override;
     procedure EnumeratedType; override;
@@ -141,6 +143,7 @@ type
     procedure FunctionMethodName; override;
     procedure FunctionProcedureName; override;
     procedure GotoStatement; override;
+    procedure TernaryOp; override;
     procedure IfStatement; override;
     procedure Identifier; override;
     procedure ImplementationSection; override;
@@ -156,11 +159,13 @@ type
     procedure InterfaceGUID; override;
     procedure InterfaceSection; override;
     procedure InterfaceType; override;
+    procedure IsNotOp; override;
     procedure LabelId; override;
     procedure MainUsesClause; override;
     procedure MainUsedUnitStatement; override;
     procedure MethodKind; override;
     procedure MultiplicativeOperator; override;
+    procedure NotInOp; override;
     procedure NotOp; override;
     procedure NilToken; override;
     procedure Number; override;
@@ -202,6 +207,7 @@ type
     procedure StringStatement; override;
     procedure StructuredType; override;
     procedure SubrangeType; override;
+    procedure ThenExpression; override;
     procedure ThenStatement; override;
     procedure TryStatement; override;
     procedure TypeArgs; override;
@@ -303,6 +309,7 @@ end;
 
 procedure AssignLexerPositionToNode(const Lexer: TPasLexer; const Node: TSyntaxNode);
 begin
+  Node.LineSeq := Lexer.PosXY.LineSeq;
   Node.Col := Lexer.PosXY.X;
   Node.Line := Lexer.PosXY.Y;
   Node.FileName := Lexer.FileName;
@@ -571,9 +578,10 @@ var
 
   NodeList: TList<TSyntaxNode>;
   Node: TSyntaxNode;
-  Col, Line: Integer;
+  Col, Line, LineSeq: Integer;
   FileName: string;
 begin
+  LineSeq := Lexer.PosXY.LineSeq;
   Line := Lexer.PosXY.Y;
   Col := Lexer.PosXY.X;
   FileName := Lexer.FileName;
@@ -591,6 +599,7 @@ begin
     begin
       ExprNode := FStack.Push(ntExpression);
       try
+        ExprNode.LineSeq := LineSeq;
         ExprNode.Line := Line;
         ExprNode.Col := Col;
         ExprNode.FileName := FileName;
@@ -1062,6 +1071,26 @@ begin
   OnComment := DoOnComment;
 end;
 
+function TPasSyntaxTreeBuilder.DequoteString(const S: string): string;
+var
+  QuoteCount, I: Integer;
+begin
+  QuoteCount := 0;
+  for I := Low(S) to High(S) do
+    if S[I] = '''' then
+      Inc(QuoteCount)
+    else
+      Break;
+
+  if (QuoteCount = 1) or (QuoteCount mod 2 = 0) then
+  begin
+    Result := AnsiDequotedStr(S, '''');
+    Exit;
+  end;
+
+  Result := Copy(S, QuoteCount + 1, Length(S) - QuoteCount * 2);
+end;
+
 destructor TPasSyntaxTreeBuilder.Destroy;
 begin
   FStack.Free;
@@ -1132,6 +1161,16 @@ procedure TPasSyntaxTreeBuilder.DotOp;
 begin
   FStack.AddChild(ntDot);
   inherited;
+end;
+
+procedure TPasSyntaxTreeBuilder.ElseExpression;
+begin
+  FStack.Push(ntElse);
+  try
+    inherited;
+  finally
+    FStack.Pop;
+  end;
 end;
 
 procedure TPasSyntaxTreeBuilder.ElseStatement;
@@ -1470,6 +1509,16 @@ begin
   inherited;
 end;
 
+procedure TPasSyntaxTreeBuilder.TernaryOp;
+begin
+  FStack.Push(ntTernaryOp);
+  try
+    inherited;
+  finally
+    FStack.Pop;
+  end;
+end;
+
 procedure TPasSyntaxTreeBuilder.IfStatement;
 begin
   FStack.Push(ntIf);
@@ -1629,6 +1678,12 @@ begin
   end;
 end;
 
+procedure TPasSyntaxTreeBuilder.IsNotOp;
+begin
+  FStack.AddChild(ntIsNot);
+  inherited;
+end;
+
 procedure TPasSyntaxTreeBuilder.LabelId;
 begin
   FStack.AddValuedChild(ntLabel, Lexer.Token);
@@ -1731,6 +1786,12 @@ begin
   inherited;
 end;
 
+procedure TPasSyntaxTreeBuilder.NotInOp;
+begin
+  FStack.AddChild(ntNotIn);
+  inherited;
+end;
+
 procedure TPasSyntaxTreeBuilder.NotOp;
 begin
   FStack.AddChild(ntNot);
@@ -1758,7 +1819,7 @@ var
 begin
   case TokenID of
     ptAnsiComment: Node := TCommentNode.Create(ntAnsiComment);
-    ptBorComment: Node := TCommentNode.Create(ntAnsiComment);
+    ptBorComment: Node := TCommentNode.Create(ntBorComment);
     ptSlashesComment: Node := TCommentNode.Create(ntSlashesComment);
   else
     raise EParserException.Create(Lexer.PosXY.Y, Lexer.PosXY.X, Lexer.FileName, 'Invalid comment type');
@@ -2112,7 +2173,9 @@ var
   I, AssignIdx: Integer;
   Position: TTokenPoint;
   FileName: string;
+  LineSeq: Integer;
 begin
+  LineSeq := Lexer.PosXY.LineSeq;
   Position := Lexer.PosXY;
   FileName := Lexer.FileName;
 
@@ -2132,6 +2195,7 @@ begin
     begin
       Temp := FStack.Push(ntAssign);
       try
+        Temp.LineSeq := LineSeq;
         Temp.Col := Position.X;
         Temp.Line := Position.Y;
         Temp.FileName := FileName;
@@ -2260,7 +2324,7 @@ end;
 procedure TPasSyntaxTreeBuilder.StringConstSimple;
 begin
   //TODO support ptAsciiChar
-  FStack.AddValuedChild(ntLiteral, AnsiDequotedStr(Lexer.Token, ''''));
+  FStack.AddValuedChild(ntLiteral, DequoteString(Lexer.Token));
   inherited;
 end;
 
@@ -2283,6 +2347,16 @@ end;
 procedure TPasSyntaxTreeBuilder.SubrangeType;
 begin
   FStack.Push(ntType).SetAttribute(anName, AttributeValues[atSubRange]);
+  try
+    inherited;
+  finally
+    FStack.Pop;
+  end;
+end;
+
+procedure TPasSyntaxTreeBuilder.ThenExpression;
+begin
+  FStack.Push(ntThen);
   try
     inherited;
   finally
@@ -2340,7 +2414,7 @@ begin
   TypeNode := FStack.Push(ntType);
   try
     inherited;
-    
+
     InnerTypeName := '';
     InnerTypeNode := TypeNode.FindNode(ntType);
     if Assigned(InnerTypeNode) then
@@ -2348,10 +2422,10 @@ begin
       InnerTypeName := InnerTypeNode.GetAttribute(anName);
       for SubNode in InnerTypeNode.ChildNodes do
         TypeNode.AddChild(SubNode.Clone);
-        
+
       TypeNode.DeleteChild(InnerTypeNode);
     end;
-    
+
     TypeName := '';
     for i := Length(TypeNode.ChildNodes) - 1 downto 0 do
     begin
@@ -2360,16 +2434,16 @@ begin
       begin
         if TypeName <> '' then
           TypeName := '.' + TypeName;
-          
+
         TypeName := SubNode.GetAttribute(anName) + TypeName;
         TypeNode.DeleteChild(SubNode);
       end;
     end;
-    
+
     if TypeName <> '' then
       TypeName := '.' + TypeName;
     TypeName := InnerTypeName + TypeName;
-      
+
     DoHandleString(TypeName);
     TypeNode.SetAttribute(anName, TypeName);
   finally
@@ -2496,7 +2570,9 @@ var
   NamesNode, UnitNode: TSyntaxNode;
   Position: TTokenPoint;
   FileName: string;
+  LineSeq: Integer;
 begin
+  LineSeq := Lexer.PosXY.LineSeq;
   Position := Lexer.PosXY;
   FileName := Lexer.FileName;
 
@@ -2514,6 +2590,7 @@ begin
     UnitNode.Col  := Position.X;
     UnitNode.Line := Position.Y;
     UnitNode.FileName := FileName;
+    UnitNode.LineSeq := LineSeq;
   finally
     NamesNode.Free;
   end;

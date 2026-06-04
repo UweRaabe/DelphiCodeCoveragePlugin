@@ -179,7 +179,8 @@ const
     ptInline,
     ptFinal,
     ptExperimental,
-    ptDispId
+    ptDispId,
+    ptNoreturn
   ];
 
 type
@@ -311,6 +312,7 @@ type
     procedure DispIDSpecifier; virtual;
     procedure DotOp; virtual;
     procedure ElseStatement; virtual;
+    procedure ElseExpression; virtual;
     procedure EmptyStatement; virtual;
     procedure EnumeratedType; virtual;
     procedure EnumeratedTypeItem; virtual;
@@ -357,6 +359,7 @@ type
     procedure Identifier; virtual;
     procedure IdentifierList; virtual;
     procedure IfStatement; virtual;
+    procedure TernaryOp; virtual;
     procedure ImplementationSection; virtual;
     procedure ImplementsSpecifier; virtual;
     procedure IncludeFile; virtual;
@@ -377,6 +380,7 @@ type
     procedure InterfaceMemberList; virtual;
     procedure InterfaceSection; virtual;
     procedure InterfaceType; virtual;
+    procedure IsNotOp; virtual;
     procedure LabelDeclarationSection; virtual;
     procedure LabeledStatement; virtual;
     procedure LabelId; virtual;
@@ -389,6 +393,7 @@ type
     procedure MethodKind; virtual;
     procedure MultiplicativeOperator; virtual;
     procedure FormalParameterType; virtual;
+    procedure NotInOp; virtual;
     procedure NotOp; virtual;
     procedure NilToken; virtual;
     procedure Number; virtual;
@@ -489,6 +494,7 @@ type
     procedure TagFieldTypeName; virtual;
     procedure Term; virtual;
     procedure ThenStatement; virtual;
+    procedure ThenExpression; virtual;
     procedure TryStatement; virtual;
     procedure TypedConstant; virtual;
     procedure TypeDeclaration; virtual;
@@ -905,6 +911,12 @@ begin
   Expected(ptNil);
 end;
 
+procedure TmwSimplePasPar.NotInOp;
+begin
+  Expected(ptNot);
+  Expected(ptIn);
+end;
+
 procedure TmwSimplePasPar.NotOp;
 begin
   Expected(ptNot);
@@ -970,6 +982,12 @@ end;
 procedure TmwSimplePasPar.SkipSlashesComment;
 begin
   Expected(ptSlashesComment);
+end;
+
+procedure TmwSimplePasPar.ThenExpression;
+begin
+  Expected(ptThen);
+  Expression;
 end;
 
 procedure TmwSimplePasPar.ThenStatement;
@@ -1897,6 +1915,10 @@ begin
       begin
         NextToken;
       end;
+    ptNoreturn:
+      begin
+        NextToken;
+      end;
   else
     begin
       SynError(InvalidDirectiveBinding);
@@ -2129,7 +2151,7 @@ begin
     ptMessage, ptNear, ptOverload, ptOverride, ptPascal, ptRegister,
     ptReintroduce, ptSafeCall, ptStdCall, ptVirtual, ptLibrary,
     ptPlatform, ptLocal, ptVarargs, ptAssembler, ptStatic, ptInline, ptForward,
-    ptExperimental, ptDeprecated] do
+    ptExperimental, ptDeprecated, ptNoreturn] do
   begin
     case ExId of
       ptExternal:
@@ -2353,6 +2375,14 @@ begin
   ThenStatement;
   if TokenID = ptElse then
     ElseStatement;
+end;
+
+procedure TmwSimplePasPar.TernaryOp;
+begin
+  Expected(ptIf);
+  Expression;
+  ThenExpression;
+  ElseExpression;
 end;
 
 procedure TmwSimplePasPar.ExceptBlock;
@@ -2743,6 +2773,12 @@ begin
   end;
 end;
 
+procedure TmwSimplePasPar.ElseExpression;
+begin
+  Expected(ptElse);
+  Expression;
+end;
+
 procedure TmwSimplePasPar.ElseStatement;
 begin
   Expected(ptElse);
@@ -2922,6 +2958,10 @@ end;
 procedure TmwSimplePasPar.Factor;
 begin
   case TokenID of
+    ptIf:
+      begin
+        TernaryOp;
+      end;
     ptAsciiChar, ptStringConst:
       begin
         CharString;
@@ -3091,12 +3131,34 @@ begin
   //Expression -> SimpleExpression [RelOp SimpleExpression]...
   //So this needs to be able to repeat itself.
   case TokenID of
-  ptEqual, ptGreater, ptGreaterEqual, ptLower, ptLowerEqual, ptIn, ptIs,
-    ptNotEqual:
+  ptEqual, ptGreater, ptGreaterEqual, ptLower, ptLowerEqual, ptIn,
+    ptNotEqual, ptNot, ptIs:
     begin
       while TokenID in [ptEqual, ptGreater, ptGreaterEqual, ptLower, ptLowerEqual,
-        ptIn, ptIs, ptNotEqual{, ptColon}] do
+        ptIn, ptNotEqual{, ptColon}, ptNot, ptIs] do
       begin
+        if TokenID = ptNot then
+        begin
+          Lexer.InitAhead;
+          if Lexer.AheadTokenID = ptIn then
+          begin
+            NotInOp;
+            SimpleExpression;
+            Continue;
+          end;
+        end;
+
+        if TokenID = ptIs then
+        begin
+          Lexer.InitAhead;
+          if Lexer.AheadTokenID = ptNot then
+          begin
+            IsNotOp;
+            SimpleExpression;
+            Continue;
+          end;
+        end;
+
         RelativeOperator;
         SimpleExpression;
       end;
@@ -3790,7 +3852,7 @@ begin
   IsStrict := ExID = ptStrict;
   if IsStrict then
     ExpectedEx(ptStrict);
-      
+
   while ExID in [ptAutomated, ptPrivate, ptProtected, ptPublic, ptPublished] do
   begin
     Lexer.InitAhead;
@@ -4164,7 +4226,7 @@ begin
   end;
   while TheTokenID in [ptAbstract, ptCdecl, ptDynamic, ptExport, ptExternal, ptFar,
     ptMessage, ptNear, ptOverload, ptOverride, ptPascal, ptRegister,
-    ptReintroduce, ptSafeCall, ptStdCall, ptVirtual, ptStatic, ptInline, ptVarargs] do
+    ptReintroduce, ptSafeCall, ptStdCall, ptVirtual, ptStatic, ptInline, ptVarargs, ptNoreturn] do
   // DR 2001-11-14 no checking for deprecated etc. since it's captured by the typedecl
   begin
     if TokenID = ptSemiColon then Semicolon;
@@ -4814,7 +4876,7 @@ begin
       begin
         ExternalDirective;
       end;
-    ptDynamic, ptMessage, ptOverload, ptOverride, ptReintroduce, ptVirtual:
+    ptDynamic, ptMessage, ptOverload, ptOverride, ptReintroduce, ptVirtual, ptNoreturn:
       begin
         DirectiveBinding;
       end;
@@ -4872,7 +4934,7 @@ begin
     ptMessage, ptNear, ptOverload, ptOverride, ptPascal, ptRegister,
     ptReintroduce, ptSafeCall, ptStdCall, ptVirtual,
     ptDeprecated, ptLibrary, ptPlatform, ptLocal, ptVarargs,
-    ptStatic, ptInline, ptAssembler, ptForward, ptDelayed] do
+    ptStatic, ptInline, ptAssembler, ptForward, ptDelayed, ptNoreturn] do
   begin
     case ExID of
       ptAssembler: NextToken;
@@ -5564,6 +5626,12 @@ end;
 function TmwSimplePasPar.IsDefined(const ADefine: string): Boolean;
 begin
   Result := FLexer.IsDefined(ADefine);
+end;
+
+procedure TmwSimplePasPar.IsNotOp;
+begin
+  Expected(ptIs);
+  Expected(ptNot);
 end;
 
 procedure TmwSimplePasPar.ExportsNameId;
